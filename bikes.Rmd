@@ -1,0 +1,42 @@
+---
+title: "Bike Api"
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tidyverse)
+library(RJSONIO)
+library(geojsonio)
+library(leaflet)
+```
+
+
+# Get data
+
+```{r}
+bikes_json <- fromJSON("https://gbfs.bcycle.com/bcycle_greenville/gbfs.json")
+bikes_df <- do.call(rbind,bikes_json$data$en$feeds)
+
+bike_stations_json <- fromJSON("https://gbfs.bcycle.com/bcycle_greenville/station_information.json")
+bike_stations_df <- do.call(rbind,bike_stations_json$data$stations)
+
+```
+
+
+# Did my GeoJSON script work?
+
+```{r}
+data_bikes <- geojson_read("C:\\Users\\johnd\\OneDrive\\stat_projects\\hackathon_2018\\BCycle_stations.geojson",what="sp")
+
+download.file("https://data.openupstate.org/map/geojson/swamp-rabbit-trail-parking",destfile="swt_parking.geojson")
+data_swt_parking <- geojson_read("swt_parking.geojson",what="sp")
+
+data_bikes %>% 
+  leaflet() %>% 
+  setView(-82.40011,34.84827, zoom = 12) %>% 
+  addTiles() %>% 
+  addCircles(color = "blue", label = ~name) %>% 
+  addCircles(data = data_swt_parking, color="red", label = ~title)
+  
+```
+
